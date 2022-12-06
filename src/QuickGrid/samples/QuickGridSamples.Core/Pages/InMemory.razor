@@ -6,7 +6,7 @@
         <TemplateColumn Title="Rank" SortBy="@rankSort" Align="Align.Center" IsDefaultSort="SortDirection.Ascending">
             <img class="flag" src="flags/@(context.Code).svg" />
         </TemplateColumn>
-        <PropertyColumn Property="@(c => c.Name)" Sortable="true">
+        <PropertyColumn Property="@(c => c.Name)" Sortable="true" Comparer="@StringLengthComparer.Instance">
             <ColumnOptions>
                 <input type="search" autofocus @bind="nameFilter" @bind:event="oninput" />
             </ColumnOptions>

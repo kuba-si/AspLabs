@@ -31,6 +31,8 @@ public class PropertyColumn<TGridItem, TProp> : ColumnBase<TGridItem>, ISortBuil
 
     GridSort<TGridItem>? ISortBuilderColumn<TGridItem>.SortBuilder => _sortBuilder;
 
+    [Parameter] public IComparer<TProp>? Comparer { get; set; } = null;
+
     /// <inheritdoc />
     protected override void OnParametersSet()
     {
@@ -60,7 +62,7 @@ public class PropertyColumn<TGridItem, TProp> : ColumnBase<TGridItem>, ISortBuil
                 _cellTextFunc = item => compiledPropertyExpression!(item)?.ToString();
             }
 
-            _sortBuilder = GridSort<TGridItem>.ByAscending(Property);
+            _sortBuilder = Comparer is not null ? GridSort<TGridItem>.ByAscending(Property, Comparer) : GridSort<TGridItem>.ByAscending(Property);
         }
 
         if (Title is null && Property.Body is MemberExpression memberExpression)
