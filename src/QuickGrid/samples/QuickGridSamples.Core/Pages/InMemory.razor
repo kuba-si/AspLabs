@@ -2,7 +2,7 @@
 @inject IDataService DataService
 
 <div class="grid">
-    <QuickGrid Items="@FilteredItems" ResizableColumns="true" Pagination="@pagination">
+    <QuickGrid Items="@FilteredItems" ResizableColumns="true" Pagination="@pagination" RowClass="@rowClass">
         <TemplateColumn Title="Rank" SortBy="@rankSort" Align="Align.Center" IsDefaultSort="SortDirection.Ascending">
             <img class="flag" src="flags/@(context.Code).svg" />
         </TemplateColumn>
@@ -24,6 +24,7 @@
     IQueryable<Country> items;
     string nameFilter = string.Empty;
     GridSort<Country> rankSort = GridSort<Country>.ByDescending(x => x.Medals.Gold).ThenDescending(x => x.Medals.Silver).ThenDescending(x => x.Medals.Bronze);
+    Func<Country, string> rowClass = x => x.Name.StartsWith("A") ? "highlighted-row" : "";
 
     IQueryable<Country> FilteredItems => items?.Where(x => x.Name.Contains(nameFilter, StringComparison.CurrentCultureIgnoreCase));
 

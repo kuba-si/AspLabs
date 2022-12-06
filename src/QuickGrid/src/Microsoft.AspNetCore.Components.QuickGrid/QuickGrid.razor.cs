@@ -95,6 +95,8 @@ public partial class QuickGrid<TGridItem> : IAsyncDisposable
     /// </summary>
     [Parameter] public PaginationState? Pagination { get; set; }
 
+    [Parameter] public Func<TGridItem, string>? RowClass { get; set; }
+
     [Inject] private IServiceProvider Services { get; set; } = default!;
     [Inject] private IJSRuntime JS { get; set; } = default!;
 
