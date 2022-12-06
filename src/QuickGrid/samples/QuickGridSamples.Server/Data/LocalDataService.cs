@@ -1,5 +1,4 @@
 using Microsoft.AspNetCore.Components.QuickGrid;
-using Microsoft.EntityFrameworkCore;
 using QuickGridSamples.Core.Models;
 
 namespace QuickGridSamples.Server.Data;
@@ -15,17 +14,19 @@ public class LocalDataService : IDataService
 
     public IQueryable<Country> Countries => _dbContext.Countries;
 
-    public async Task<GridItemsProviderResult<Country>> GetCountriesAsync(int startIndex, int? count, string sortBy, bool sortAscending, CancellationToken cancellationToken)
+    public Task<GridItemsProviderResult<Country>> GetCountriesAsync(int startIndex, int? count, string sortBy, bool sortAscending, CancellationToken cancellationToken)
     {
+        var countries = _dbContext.Countries.AsEnumerable();
+
         var ordered = (sortBy, sortAscending) switch
         {
-            (nameof(Country.Name), true) => _dbContext.Countries.OrderBy(c => c.Name),
-            (nameof(Country.Name), false) => _dbContext.Countries.OrderByDescending(c => c.Name),
-            (nameof(Country.Code), true) => _dbContext.Countries.OrderBy(c => c.Code),
-            (nameof(Country.Code), false) => _dbContext.Countries.OrderByDescending(c => c.Code),
-            ("Medals.Gold", true) => _dbContext.Countries.OrderBy(c => c.Medals.Gold),
-            ("Medals.Gold", false) => _dbContext.Countries.OrderByDescending(c => c.Medals.Gold),
-            _ => _dbContext.Countries.OrderByDescending(c => c.Medals.Gold),
+            (nameof(Country.Name), true) => countries.OrderBy(c => c.Name, StringLengthComparer.Instance),
+            (nameof(Country.Name), false) => countries.OrderByDescending(c => c.Name, StringLengthComparer.Instance),
+            (nameof(Country.Code), true) => countries.OrderBy(c => c.Code),
+            (nameof(Country.Code), false) => countries.OrderByDescending(c => c.Code),
+            ("Medals.Gold", true) => countries.OrderBy(c => c.Medals.Gold),
+            ("Medals.Gold", false) => countries.OrderByDescending(c => c.Medals.Gold),
+            _ => countries.OrderByDescending(c => c.Medals.Gold),
         };
 
         var result = ordered.Skip(startIndex);
@@ -35,6 +36,8 @@ public class LocalDataService : IDataService
             result = result.Take(count.Value);
         }
 
-        return GridItemsProviderResult.From(await result.ToListAsync(cancellationToken), await ordered.CountAsync());
+        var array = result.ToArray();
+
+        return Task.FromResult(GridItemsProviderResult.From(array, array.Length));
     }
 }
