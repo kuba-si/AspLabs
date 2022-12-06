@@ -6,11 +6,14 @@
         <TemplateColumn Title="Rank" SortBy="@rankSort" Align="Align.Center" IsDefaultSort="SortDirection.Ascending">
             <img class="flag" src="flags/@(context.Code).svg" />
         </TemplateColumn>
-        <PropertyColumn Property="@(c => c.Name)" Sortable="true">
+        <TemplateColumn Title="Name" SortBy="@nameSort">
             <ColumnOptions>
                 <input type="search" autofocus @bind="nameFilter" @bind:event="oninput" />
             </ColumnOptions>
-        </PropertyColumn>
+            <ChildContent>
+                @(context.Name)
+            </ChildContent>            
+        </TemplateColumn>                            
         <PropertyColumn Property="@(c => c.Medals.Gold)" Sortable="true" Align="Align.Right" />
         <PropertyColumn Property="@(c => c.Medals.Silver)" Sortable="true" Align="Align.Right" />
         <PropertyColumn Property="@(c => c.Medals.Bronze)" Sortable="true" Align="Align.Right" />
@@ -24,6 +27,7 @@
     IQueryable<Country> items;
     string nameFilter = string.Empty;
     GridSort<Country> rankSort = GridSort<Country>.ByDescending(x => x.Medals.Gold).ThenDescending(x => x.Medals.Silver).ThenDescending(x => x.Medals.Bronze);
+    GridSort<Country> nameSort = GridSort<Country>.ByAscending(x => x.Name, StringLengthComparer.Instance);
 
     IQueryable<Country> FilteredItems => items?.Where(x => x.Name.Contains(nameFilter, StringComparison.CurrentCultureIgnoreCase));
 
