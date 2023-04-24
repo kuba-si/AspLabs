@@ -189,17 +189,26 @@ public partial class QuickGrid<TGridItem> : IAsyncDisposable
     }
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
-    {
-        if (firstRender)
+    {        
+        try
         {
-            _jsModule = await JS.InvokeAsync<IJSObjectReference>("import", "./_content/Microsoft.AspNetCore.Components.QuickGrid.Tweaked/QuickGrid.razor.js");
-            _jsEventDisposable = await _jsModule.InvokeAsync<IJSObjectReference>("init", _tableReference);
-        }
+            if (firstRender)
+            {
+                _jsModule = await JS.InvokeAsync<IJSObjectReference>("import", "./_content/Microsoft.AspNetCore.Components.QuickGrid.Tweaked/QuickGrid.razor.js");
+                _jsEventDisposable = await _jsModule.InvokeAsync<IJSObjectReference>("init", _tableReference);
+            }
 
-        if (_checkColumnOptionsPosition && _displayOptionsForColumn is not null)
+            if (_checkColumnOptionsPosition && _displayOptionsForColumn is not null)
+            {
+                _checkColumnOptionsPosition = false;
+                _ = _jsModule?.InvokeVoidAsync("checkColumnOptionsPosition", _tableReference);
+            }
+        }
+        catch (JSException)
         {
-            _checkColumnOptionsPosition = false;
-            _ = _jsModule?.InvokeVoidAsync("checkColumnOptionsPosition", _tableReference);
+            // GRP-345 InvokeAsync (init / checkColumnOptionsPosition) may throw a JSException
+            // if the user navigates away from the page containing the grid during a JS interop
+            // round-trip to the browser. This is not an error.
         }
     }
 

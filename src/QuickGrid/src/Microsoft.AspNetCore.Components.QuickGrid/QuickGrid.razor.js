@@ -1,4 +1,10 @@
 export function init(tableElement) {
+    // GRP-345 tableElement may be null if the user navigates away from the page
+    // containing the grid before the JS interop request reaches the browser.
+    if (tableElement === null) {
+        return;
+    }
+
     enableColumnResizing(tableElement);
 
     const bodyClickHandler = event => {
@@ -28,6 +34,12 @@ export function init(tableElement) {
 }
 
 export function checkColumnOptionsPosition(tableElement) {
+    // GRP-345 tableElement may be null if the user navigates away from the page
+    // containing the grid before the JS interop request reaches the browser.
+    if (tableElement === null) {
+        return;
+    }
+
     const colOptions = tableElement.tHead && tableElement.tHead.querySelector('.col-options'); // Only match within *our* thead, not nested tables
     if (colOptions) {
         // We want the options popup to be positioned over the grid, not overflowing on either side, because it's possible that
